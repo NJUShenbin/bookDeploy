@@ -19,3 +19,6 @@ def finish(name):
 def getState():
     global state, begin, end
     return state
+
+def isBuilding():
+    return (state=="building")

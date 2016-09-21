@@ -5,16 +5,18 @@ import buildState
 import time
 import threading
 import os
+from HangUpBuild import HangUpBuild
 
 app = Flask(__name__)
 gitPath = "/root/bookDeploy/testDeployBook/"
+hang = HangUpBuild()
 
 @app.route('/commit',methods=["POST"])
 def commit():
-    # body = request.get_json(force=True)
-    # print(body["repository"]["name"])
-    # print(body["commits"][0]["author"]["username"])
-    # return "hello world!"
+
+    if buildState.isBuilding():
+        hang.hangUp()
+        return "busy"
 
     t = threading.Thread(target=buildBook,args=("NJUShenbin",gitPath))
     t.start()
@@ -23,6 +25,11 @@ def commit():
 def buildBook(name,gitPath):
     buildState.building()
     os.system("sh deployHtml.sh "+gitPath)
+
+    while hang.hasHangUp():
+        hang.noHangUp()
+        os.system("sh deployHtml.sh " + gitPath)
+
     buildState.finish(name)
 
 @app.route('/')
