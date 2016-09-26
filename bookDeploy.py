@@ -1,16 +1,10 @@
-import os
 import sys
-import threading
-
-from HangUpBuild import HangUpBuild
-from flask import Flask
-
-from BookBuilder.BuildState import BuildState
+import ReposConfig
+from flask import Flask,request
+from BookBuilder.BuilderDispatcher import BuilderDispatcher
 
 app = Flask(__name__)
-gitPath = "/root/bookDeploy/DocumentMakeMeHappy/"
-hang = HangUpBuild()
-
+dispatcher = BuilderDispatcher(ReposConfig.repos)
 
 @app.route('/commit',methods=["POST"])
 def commit():
@@ -18,30 +12,14 @@ def commit():
     # print(body["repository"]["name"])
     # print(body["commits"][0]["author"]["username"])
     # return "hello world!"
-
-    if BuildState.isBuilding():
-        hang.hangUp()
-        print("is busy , hang up")
-        return "busy"
-
-    t = threading.Thread(target=buildBook,args=("NJUShenbin",gitPath))
-    t.start()
-    return "OK"
-
-def buildBook(name,gitPath):
-    BuildState.building()
-    os.system("sh deployHtml.sh "+gitPath)
-
-    while hang.hasHangUp():
-        print("something hangup,build again")
-        hang.noHangUp()
-        os.system("sh deployHtml.sh " + gitPath)
-
-    BuildState.finish(name)
+    body = request.get_json(force=True)
+    return dispatcher.dispatch(body)
 
 @app.route('/')
 def home():
-    return BuildState.getState()
+    states = dispatcher.getBuildStates()
+    separator = "<br/>"
+    return separator.join(states)
 
 if __name__ == '__main__':
     # 如果没有其他参数就是debug模式运行,如果有参数就是生产环境运行
