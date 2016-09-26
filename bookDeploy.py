@@ -22,7 +22,7 @@ def home():
     return separator.join(states)
 
 if __name__ == '__main__':
-    # 如果没有其他参数就是debug模式运行,如果有参数就是生产环境运行
+    # if has para,the run as production
     if len(sys.argv) == 1:
         app.run(debug=True)
     else:
