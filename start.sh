@@ -1,5 +1,8 @@
 #!/bin/bash
-cd /root/bookDeploy/
+
+#goto current shell file dir
+cd `dirname $0`
+
 if [ -f "nohup.out" ]; then
   rm -f nohup.out
 fi
@@ -7,5 +10,6 @@ fi
 if [ -f "pid" ]; then
   kill $(cat pid)
 fi
+
 nohup python bookDeploy.py prod &
 echo "$!" > pid

@@ -25,21 +25,28 @@ class BookBuilder:
             self.__hang.hangUp()
             return "busy"
 
-        t = threading.Thread(target=self.buildBook,args=(responseBody,))
+        t = threading.Thread(target=self.__buildBook, args=(responseBody,))
         t.start()
         return "OK"
 
-    def buildBook(self,body):
+    def __buildBook(self, body):
         self.__buildState.building()
 
         gitUrl = self.__repoTuple[0]
         deployDir = self.__repoTuple[1]
 
-        os.system("sh deployHtml.sh " + gitUrl + " "+deployDir)
+        self.__excuteBuildShell(gitUrl,deployDir)
 
         while self.__hang.hasHangUp():
             print("something hangup,build again")
             self.__hang.noHangUp()
-            os.system("sh deployHtml.sh " + gitUrl + " " + deployDir)
+            self.__excuteBuildShell(gitUrl, deployDir)
 
         self.__buildState.finish(body["repository"]["name"])
+
+    def __excuteBuildShell(self,gitUrl,deployDir):
+        repoName = gitUrl[gitUrl.rindex("/")+1:]
+
+        if deployDir[0] == '/':
+            deployDir = deployDir[1:]
+        os.system("sh deployHtml.sh "+gitUrl+" "+repoName+" "+deployDir)
