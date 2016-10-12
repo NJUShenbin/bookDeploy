@@ -15,5 +15,13 @@ class BuilderDispatcher:
             if builder.match(responseBody):
                 return builder.build(responseBody)
 
+        #not match,dynamic genernate a bookBuilder
+        url = responseBody["repository"]["url"]
+        repoName = responseBody["repository"]["name"]
+        config = (url,repoName)
+        builder = BookBuilder(config)
+        self.__builders.append(builder)
+        return builder.build(responseBody)
+
     def getBuildStates(self):
         return [b.getBuildState() for b in self.__builders]
