@@ -25,7 +25,7 @@ else
 fi
 
 gitbook install
-gitbook build
+gitbook build ./ ./__book__
 rm -r /var/www/html/$deployDir
-cp -r ./_book /var/www/html/$deployDir
+mv ./__book__ /var/www/html/$deployDir
 echo "---------end build---------"
